@@ -1,0 +1,17 @@
+# .NET Build Files
+bin
+obj
+out
+
+# User-Specific Files
+.vscode/
+.idea/
+*.vs/
+
+# NuGet Packages
+*.nupkg
+*.snupkg
+packages/
+.nuget/
+project.lock.json
+project.assets.json
