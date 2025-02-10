@@ -1,9 +1,11 @@
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using BlazorEcommerce.Data;
 
 namespace BlazorEcommerce.Data
 {
     public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : IdentityDbContext<ApplicationUser>(options)
     {
+        public DbSet<BlazorEcommerce.Data.ProductCategory> ProductCategory { get; set; } = default!;
     }
 }

@@ -1,0 +1,89 @@
+﻿@page "/productcategories/edit"
+@using Microsoft.EntityFrameworkCore
+@using BlazorEcommerce.Data
+@inject IDbContextFactory<BlazorEcommerce.Data.ApplicationDbContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Edit</PageTitle>
+
+<h1>Edit</h1>
+
+<h2>ProductCategory</h2>
+<hr />
+@if (ProductCategory is null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="row">
+        <div class="col-md-4">
+            <EditForm method="post" Model="ProductCategory" OnValidSubmit="UpdateProductCategory" FormName="edit" Enhance>
+                <DataAnnotationsValidator />
+                <ValidationSummary role="alert"/>
+                <input type="hidden" name="ProductCategory.Id" value="@ProductCategory.Id" />
+                <div class="mb-3">
+                    <label for="name" class="form-label">Name:</label>
+                    <InputText id="name" @bind-Value="ProductCategory.Name" class="form-control" />
+                    <ValidationMessage For="() => ProductCategory.Name" class="text-danger" />
+                </div>
+                <button type="submit" class="btn btn-primary">Save</button>
+            </EditForm>
+        </div>
+    </div>
+}
+
+<div>
+    <a href="/productcategories">Back to List</a>
+</div>
+
+@code {
+    [SupplyParameterFromQuery]
+    private int Id { get; set; }
+
+    [SupplyParameterFromForm]
+    private ProductCategory? ProductCategory { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        ProductCategory ??= await context.ProductCategory.FirstOrDefaultAsync(m => m.Id == Id);
+
+        if (ProductCategory is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+
+    // To protect from overposting attacks, enable the specific properties you want to bind to.
+    // For more information, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
+    private async Task UpdateProductCategory()
+    {
+        using var context = DbFactory.CreateDbContext();
+        context.Attach(ProductCategory!).State = EntityState.Modified;
+
+        try
+        {
+            await context.SaveChangesAsync();
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            if (!ProductCategoryExists(ProductCategory!.Id))
+            {
+                NavigationManager.NavigateTo("notfound");
+            }
+            else
+            {
+                throw;
+            }
+        }
+
+        NavigationManager.NavigateTo("/productcategories");
+    }
+
+    private bool ProductCategoryExists(int id)
+    {
+        using var context = DbFactory.CreateDbContext();
+        return context.ProductCategory.Any(e => e.Id == id);
+    }
+}

@@ -1,0 +1,55 @@
+﻿@page "/productcategories/delete"
+@using Microsoft.EntityFrameworkCore
+@using BlazorEcommerce.Data
+@inject IDbContextFactory<BlazorEcommerce.Data.ApplicationDbContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Delete</PageTitle>
+
+<h1>Delete</h1>
+
+<p>Are you sure you want to delete this?</p>
+<div>
+    <h2>ProductCategory</h2>
+    <hr />
+    @if (productcategory is null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else {
+        <dl class="row">
+            <dt class="col-sm-2">Name</dt>
+            <dd class="col-sm-10">@productcategory.Name</dd>
+        </dl>
+        <EditForm method="post" Model="productcategory" OnValidSubmit="DeleteProductCategory" FormName="delete" Enhance>
+            <button type="submit" class="btn btn-danger" disabled="@(productcategory is null)">Delete</button> |
+            <a href="/productcategories">Back to List</a>
+        </EditForm>
+    }
+</div>
+
+@code {
+    private ProductCategory? productcategory;
+
+    [SupplyParameterFromQuery]
+    private int Id { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        productcategory = await context.ProductCategory.FirstOrDefaultAsync(m => m.Id == Id);
+
+        if (productcategory is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+
+    private async Task DeleteProductCategory()
+    {
+        using var context = DbFactory.CreateDbContext();
+        context.ProductCategory.Remove(productcategory!);
+        await context.SaveChangesAsync();
+        NavigationManager.NavigateTo("/productcategories");
+    }
+}

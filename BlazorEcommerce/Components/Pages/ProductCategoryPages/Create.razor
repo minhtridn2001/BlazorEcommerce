@@ -1,0 +1,44 @@
+﻿@page "/productcategories/create"
+@using Microsoft.EntityFrameworkCore
+@using BlazorEcommerce.Data
+@inject IDbContextFactory<BlazorEcommerce.Data.ApplicationDbContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Create</PageTitle>
+
+<h1>Create</h1>
+
+<h2>ProductCategory</h2>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <EditForm method="post" Model="ProductCategory" OnValidSubmit="AddProductCategory" FormName="create" Enhance>
+            <DataAnnotationsValidator />
+            <ValidationSummary class="text-danger" role="alert"/>
+            <div class="mb-3">
+                <label for="name" class="form-label">Name:</label> 
+                <InputText id="name" @bind-Value="ProductCategory.Name" class="form-control" /> 
+                <ValidationMessage For="() => ProductCategory.Name" class="text-danger" /> 
+            </div>        
+            <button type="submit" class="btn btn-primary">Create</button>
+        </EditForm>
+    </div>
+</div>
+
+<div>
+    <a href="/productcategories">Back to List</a>
+</div>
+
+@code {
+    [SupplyParameterFromForm]
+    private ProductCategory ProductCategory { get; set; } = new();
+
+    // To protect from overposting attacks, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
+    private async Task AddProductCategory()
+    {
+        using var context = DbFactory.CreateDbContext();
+        context.ProductCategory.Add(ProductCategory);
+        await context.SaveChangesAsync();
+        NavigationManager.NavigateTo("/productcategories");
+    }
+}

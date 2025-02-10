@@ -1,0 +1,46 @@
+﻿@page "/productcategories/details"
+@using Microsoft.EntityFrameworkCore
+@using BlazorEcommerce.Data
+@inject IDbContextFactory<BlazorEcommerce.Data.ApplicationDbContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Details</PageTitle>
+
+<h1>Details</h1>
+
+<div>
+    <h2>ProductCategory</h2>
+    <hr />
+    @if (productcategory is null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else {
+        <dl class="row">
+            <dt class="col-sm-2">Name</dt>
+            <dd class="col-sm-10">@productcategory.Name</dd>
+        </dl>
+        <div>
+            <a href="@($"/productcategories/edit?id={productcategory.Id}")">Edit</a> |
+            <a href="@($"/productcategories")">Back to List</a>
+        </div>
+    }
+</div>
+
+@code {
+    private ProductCategory? productcategory;
+
+    [SupplyParameterFromQuery]
+    private int Id { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        productcategory = await context.ProductCategory.FirstOrDefaultAsync(m => m.Id == Id);
+
+        if (productcategory is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+}
