@@ -2,6 +2,8 @@
 @page "/products/{id:guid}"
 @using Microsoft.EntityFrameworkCore
 @using BlazorEcommerce.Data
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize(Roles = "Admin")]
 @inject IDbContextFactory<BlazorEcommerce.Data.ApplicationDbContext> DbFactory
 @inject NavigationManager NavigationManager
 @rendermode InteractiveServer

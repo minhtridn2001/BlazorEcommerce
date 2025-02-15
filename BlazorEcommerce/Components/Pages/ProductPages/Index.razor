@@ -2,6 +2,8 @@
 @using Microsoft.EntityFrameworkCore
 @using Microsoft.AspNetCore.Components.QuickGrid
 @using BlazorEcommerce.Data
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize(Roles = "Admin")]
 @implements IAsyncDisposable
 @inject IDbContextFactory<BlazorEcommerce.Data.ApplicationDbContext> DbFactory
 
