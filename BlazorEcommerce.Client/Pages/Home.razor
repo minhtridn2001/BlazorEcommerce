@@ -1,0 +1,132 @@
+﻿@page "/"
+@using Microsoft.FluentUI.AspNetCore.Components
+@using System.Globalization
+@using BlazorEcommerce.Shared.DTO
+@inject HttpClient Http
+
+@rendermode InteractiveAuto
+
+<PageTitle>Home</PageTitle>
+@if (IsLoading)
+{
+    <div class="position-absolute w-100 vh-100 d-flex align-items-center justify-content-center">
+        <FluentProgressRing></FluentProgressRing>
+    </div>
+}
+else
+{
+    <div class="container-fluid px-0 m-0 full-width">
+        <div class="content px-4 m-2">
+            <ul class="nav nav-underline justify-content-center mb-2">
+                @foreach (var category in Categories)
+                {
+                    <li class="nav-item">
+                        <span class="nav-link" href="#@category.Name" style="cursor: pointer" @onclick="() => FilterProducts(category.Id)">@category.Name</span>
+                    </li>
+                }
+            </ul>
+            <div class="row mt-4 mx-1">
+
+                @foreach (var prod in Products)
+                {
+                    <div class="col-12 col-md-6 col-lg-4 pe-3 mb-5">
+                        <div class="card">
+                            <div class="text-center">
+                                @if (!string.IsNullOrEmpty(prod.ImageUrl))
+                                {
+                                    <img class="card-img-top img-thumbnail w-75 mt-2" src="@prod.ImageUrl" />
+                                }
+                                else
+                                {
+                                    <img class="card-img-top img-thumbnail w-75 mt-2" src="images/default.png" style="" />
+                                }
+
+                            </div>
+                            <div class="card-body">
+                                <h5 class="text-center lead">@prod.Price.ToString("C", CultureInfo.GetCultureInfo("vi-VN"))</h5>
+                                <h4 class="text-center text-warning lead">@prod.Name</h4>
+                                <h4 class="text-center">
+                                    <i class="bi bi-cart3 btn btn-success text-right  px-5 form-control"> Add to cart</i>
+                                </h4>
+
+
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private IEnumerable<ProductDTO> Products = new List<ProductDTO>();
+    private IEnumerable<CategoryDTO> Categories = new List<CategoryDTO>();
+    private bool IsLoading { get; set; } = true;
+    private int SelectedCategoryId { get; set; } = 0;
+    private int PageSize = 10;
+    private int CurrentPage = 1;
+    private int TotalPages;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            try 
+            {
+                await LoadCategories();
+				SelectedCategoryId = Categories.FirstOrDefault()?.Id ?? 0;
+                await LoadProducts(CurrentPage, SelectedCategoryId);
+            } catch (Exception ex) {
+                Console.Error.WriteLine($"Error loading data: {ex}");
+            } 
+            finally {
+                IsLoading = false;
+                StateHasChanged();
+            }
+
+        }
+    }
+
+    private async Task LoadCategories()
+    {
+        try
+        {
+            var response = await Http.GetFromJsonAsync<IEnumerable<CategoryDTO>>("api/categories");
+            if (response != null)
+            {
+                Categories = response;
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading categories: {ex}");
+        }
+    }
+
+    private async Task LoadProducts(int pageNumber = 1, int categoryId = 0)
+    {
+        try
+        {
+            var response = await Http.GetFromJsonAsync<PagedResultDTO<ProductDTO>>($"api/products?pageNumber={pageNumber}&pageSize={PageSize}&categoryId={SelectedCategoryId}");
+            if (response != null)
+            {
+                Products = response.Items;
+                TotalPages = response.TotalPages;
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading products: {ex.Message}");
+        }
+    }
+
+    private async void FilterProducts(int categoryId)
+    {
+        SelectedCategoryId = categoryId;
+        CurrentPage = 1;
+        await LoadProducts(CurrentPage, categoryId);
+        StateHasChanged();
+    }
+
+}   
