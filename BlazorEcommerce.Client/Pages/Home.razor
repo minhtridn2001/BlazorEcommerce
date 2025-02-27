@@ -21,7 +21,7 @@ else
                 @foreach (var category in Categories)
                 {
                     <li class="nav-item">
-                        <span class="nav-link" href="#@category.Name" style="cursor: pointer" @onclick="() => FilterProducts(category.Id)">@category.Name</span>
+                        <span class="nav-link @GetCategoryActiveClass(category.Id)" href="#@category.Name" style="cursor: pointer" @onclick="() => FilterProducts(category.Id)">@category.Name</span>
                     </li>
                 }
             </ul>
@@ -127,6 +127,11 @@ else
         CurrentPage = 1;
         await LoadProducts(CurrentPage, categoryId);
         StateHasChanged();
+    }
+
+	private string GetCategoryActiveClass(int categoryId)
+	{
+		return categoryId == SelectedCategoryId ? "active" : "";
     }
 
 }   
