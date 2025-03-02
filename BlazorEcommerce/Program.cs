@@ -56,7 +56,12 @@ builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSe
 builder.Services.AddScoped(sp =>
 {
     var navManager = sp.GetRequiredService<NavigationManager>();
-    return new HttpClient { BaseAddress = new Uri(navManager.BaseUri) };
+    var handler = new HttpClientHandler
+    {
+        UseCookies = true,
+        CookieContainer = new System.Net.CookieContainer()
+    };
+    return new HttpClient(handler) { BaseAddress = new Uri(navManager.BaseUri) };
 });
 
 builder.Services.AddFluentUIComponents();
@@ -80,7 +85,8 @@ else
 
 app.UseHttpsRedirection();
 
-
+app.UseAuthentication();
+app.UseAuthorization();
 app.UseAntiforgery();
 
 app.MapStaticAssets();

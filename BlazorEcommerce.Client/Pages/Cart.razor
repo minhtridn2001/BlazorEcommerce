@@ -1,0 +1,221 @@
+﻿@page "/Cart"
+@using Microsoft.AspNetCore.Authorization
+@using BlazorEcommerce.Shared.DTO
+@using System.Globalization
+@using System.ComponentModel.DataAnnotations
+@using System.Text.Json
+
+@inject NavigationManager _navigationManager
+@inject HttpClient Http
+
+@attribute [Authorize]
+@rendermode InteractiveWebAssembly
+
+<PageTitle>Cart</PageTitle>
+
+<div class="container-fluid px-0 m-0 full-width">
+
+    @if (IsLoading)
+    {
+        <div class="position-absolute w-100 vh-100 d-flex align-items-center justify-content-center">
+            <FluentProgressRing></FluentProgressRing>
+        </div>
+    }
+    else
+    {
+        <h2 class="text-center text-success mb-4">Your Cart</h2>
+        <div class="row">
+            <div class="col-lg-7 col-12">
+                @if (!cartItems.Any())
+                {
+                    <p>Your cart is empty.</p>
+                }
+                else
+                {
+                    <div class="d-flex flex-wrap gap-2 overflow-auto" style="max-height: 400px;">
+                        @foreach (var item in cartItems)
+                        {
+                            <div class="d-flex align-items-center border rounded p-2 shadow-sm w-100" style="min-width: 320px;">
+                                <img src="@item.ImageUrl" class="rounded" style="width: 50px; height: 50px; object-fit: cover;">
+                                <div class="ms-2 flex-grow-1">
+                                    <h6 class="mb-0 text-truncate" style="max-width: 150px;">@item.ProductName</h6>
+                                </div>
+                                <div class="d-flex align-items-center">
+                                    <button class="btn btn-outline-secondary btn-sm me-2" @onclick="() => UpdateQuantity(item, -1)">
+                                        <i class="bi bi-dash-lg"></i>
+                                    </button>
+                                    <span class="fw-bold">@item.Quantity</span>
+                                    <button class="btn btn-outline-secondary btn-sm ms-2" @onclick="() => UpdateQuantity(item, 1)">
+                                        <i class="bi bi-plus-lg"></i>
+                                    </button>
+                                </div>
+                                <h6 class="text-danger fw-bold ms-3">@((item.TotalPrice).ToString("C", CultureInfo.GetCultureInfo("vi-VN")))</h6>
+                                <button class="btn btn-outline-danger btn-sm ms-3" @onclick="() => RemoveItem(item)">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+
+            <div class="col-lg-5 col-12">
+                <div class="border rounded p-3 shadow-sm">
+                    <h4 class="text-center mb-3">Order Information</h4>
+                    <hr>
+                    <div class="d-flex justify-content-between">
+                        <h5 class="fw-bold">Total Items:</h5>
+                        <h5>@cartItems?.Sum(item => item.Quantity)</h5>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <h5 class="fw-bold">Sub Total:</h5>
+                        <h5 class="text-success fw-bold">@cartItems?.Sum(item => item.TotalPrice).ToString("C", CultureInfo.GetCultureInfo("vi-VN"))</h5>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <h5 class="fw-bold">Tax (10%):</h5>
+                        <h5 class="text-success fw-bold">@cartItems?.Sum(item => item.TotalPrice * 0.1M).ToString("C", CultureInfo.GetCultureInfo("vi-VN"))</h5>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <h5 class="fw-bold">Grand Total:</h5>
+                        <h5 class="text-success fw-bold">@cartItems?.Sum(item => item.TotalPrice * 1.1M).ToString("C", CultureInfo.GetCultureInfo("vi-VN"))</h5>
+                    </div>
+                    <hr>
+                    <h4 class="text-center mb-3">Shipping Information</h4>
+                    <EditForm Model="orderInfo" OnValidSubmit="CreateOrder">
+                        <DataAnnotationsValidator />
+                        <ValidationSummary />
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Receiver Name</label>
+                            <InputText class="form-control" @bind-Value="orderInfo.Name" />
+                            <ValidationMessage For="() => orderInfo.Name" class="text-danger" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Phone</label>
+                            <InputText class="form-control" @bind-Value="orderInfo.Phone" />
+                            <ValidationMessage For="() => orderInfo.Phone" class="text-danger" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Shipping Address</label>
+                            <InputText class="form-control" @bind-Value="orderInfo.Address" />
+                            <ValidationMessage For="() => orderInfo.Address" class="text-danger" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Notes</label>
+                            <InputText class="form-control" @bind-Value="orderInfo.Notes" />
+                        </div>
+                        <button class="btn btn-success w-100 mt-3 py-2" type="submit" disabled="@(!cartItems.Any())">
+                            <i class="bi bi-cart-check"></i> Place Order
+                        </button>
+                    </EditForm>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    private bool IsLoading { get; set; } = true;
+    private IEnumerable<CartItemDTO> cartItems = new List<CartItemDTO>();
+    private OrderInfo orderInfo = new();
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            try
+            {
+                await LoadCartItems();
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Error loading data: {ex}");
+            }
+            finally
+            {
+                IsLoading = false;
+                StateHasChanged();
+            }
+
+        }
+    }
+
+    private async Task LoadCartItems()
+    {
+        try
+        {
+            var response = await Http.GetFromJsonAsync<IEnumerable<CartItemDTO>>("api/cartItems");
+            if (response != null)
+            {
+                cartItems = response;
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading categories: {ex}");
+        }
+    }
+
+    private async Task UpdateQuantity(CartItemDTO item, int change)
+    {
+        if (item.Quantity + change <= 0)
+        {
+            await RemoveItem(item);
+            return;
+        }
+
+        try
+        {
+            var response = await Http.PutAsJsonAsync($"api/cartItems/{item.ProductId}?change={change}", new { });
+
+            if (response.IsSuccessStatusCode)
+            {
+                item.Quantity += change;
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error updating quantity: {ex}");
+        }
+    }
+
+    private async Task RemoveItem(CartItemDTO item)
+    {
+        try
+        {
+            var response = await Http.DeleteAsync($"api/cartItems/{item.ProductId}");
+            if (response.IsSuccessStatusCode)
+            {
+                cartItems = cartItems.Where(i => i.ProductId != item.ProductId).ToList();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error removing item: {ex}");
+        }
+    }
+
+    private void CreateOrder()
+	{
+        // TODO place order
+        // Go to order detail page
+        Console.WriteLine($"Order: {JsonSerializer.Serialize(orderInfo)}");
+        Console.WriteLine($"Order items: {JsonSerializer.Serialize(cartItems)}");
+        // _navigationManager.NavigateTo("/Order/id");
+	}
+
+    public class OrderInfo
+    {
+        [Required(ErrorMessage = "Name is required")]
+        public string Name { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Phone number is required")]
+        [RegularExpression("^[0-9]{10,15}$", ErrorMessage = "Invalid phone number format")]
+        public string Phone { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Shipping address is required")]
+        public string Address { get; set; } = string.Empty;
+
+        public string? Notes { get; set; }
+    }
+}

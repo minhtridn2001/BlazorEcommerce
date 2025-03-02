@@ -8,5 +8,6 @@ namespace BlazorEcommerce.Data
     {
         public DbSet<BlazorEcommerce.Data.ProductCategory> ProductCategory { get; set; } = default!;
         public DbSet<BlazorEcommerce.Data.Product> Product { get; set; } = default!;
+        public DbSet<BlazorEcommerce.Data.CartItem> CartItem { get; set; } = default!;
     }
 }

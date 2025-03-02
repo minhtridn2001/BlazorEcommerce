@@ -1,7 +1,11 @@
 ﻿@page "/"
+@using Microsoft.AspNetCore.Authorization
 @using Microsoft.FluentUI.AspNetCore.Components
 @using System.Globalization
 @using BlazorEcommerce.Shared.DTO
+
+@inject NavigationManager _navigationManager
+@inject AuthenticationStateProvider _authenticationStateProvider
 @inject HttpClient Http
 
 @rendermode InteractiveAuto
@@ -17,11 +21,11 @@ else
 {
     <div class="container-fluid px-0 m-0 full-width">
         <div class="content px-4 m-2">
-            <ul class="nav nav-underline justify-content-center mb-2">
+            <ul class="nav justify-content-center mb-3 category-nav">
                 @foreach (var category in Categories)
                 {
                     <li class="nav-item">
-                        <span class="nav-link @GetCategoryActiveClass(category.Id)" href="#@category.Name" style="cursor: pointer" @onclick="() => FilterProducts(category.Id)">@category.Name</span>
+                        <span class="nav-link @GetCategoryActiveClass(category.Id)" href="#@category.Name" @onclick="() => FilterProducts(category.Id)">@category.Name</span>
                     </li>
                 }
             </ul>
@@ -46,7 +50,7 @@ else
                                 <h5 class="text-center lead">@prod.Price.ToString("C", CultureInfo.GetCultureInfo("vi-VN"))</h5>
                                 <h4 class="text-center text-warning lead">@prod.Name</h4>
                                 <h4 class="text-center">
-                                    <i class="bi bi-cart3 btn btn-success text-right  px-5 form-control"> Add to cart</i>
+                                    <i class="bi bi-cart3 btn btn-success text-right  px-5 form-control" @onclick="() => AddToCart(prod.Id)"> Add to cart</i>
                                 </h4>
 
 
@@ -134,4 +138,30 @@ else
 		return categoryId == SelectedCategoryId ? "active" : "";
     }
 
-}   
+    private async Task AddToCart(string productId)
+    {
+        var context = await _authenticationStateProvider.GetAuthenticationStateAsync();
+        var isAuthenticated = context?.User?.Identity?.IsAuthenticated;
+
+        if (!(isAuthenticated ?? false))
+        {
+            _navigationManager.NavigateTo("Account/Login");
+        }
+        try
+        {
+            var response = await Http.PutAsJsonAsync($"api/cartItems/{productId}", new { });
+            if (response.IsSuccessStatusCode)
+            {
+                Console.WriteLine("Product added to cart successfully.");
+            }
+            else
+            {
+                Console.WriteLine($"Failed to add product to cart with response: {response}");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error adding product to cart: {ex.Message}");
+        }
+    }
+}
