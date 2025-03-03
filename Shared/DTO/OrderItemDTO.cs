@@ -6,13 +6,11 @@ using System.Threading.Tasks;
 
 namespace BlazorEcommerce.Shared.DTO
 {
-    public class CartItemDTO
+    public class OrderItemDTO
     {
-        public string ProductId { get; set; } = string.Empty;
+        public string ProductId { get; set; }
         public string ProductName { get; set; } = string.Empty;
-        public string? ImageUrl { get; set; }
         public decimal Price { get; set; }
         public int Quantity { get; set; }
-        public decimal TotalPrice => Price * Quantity;
     }
 }

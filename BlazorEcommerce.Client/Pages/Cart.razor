@@ -86,9 +86,9 @@
                         <ValidationSummary />
 
                         <div class="mb-3">
-                            <label class="form-label fw-bold">Receiver Name</label>
-                            <InputText class="form-control" @bind-Value="orderInfo.Name" />
-                            <ValidationMessage For="() => orderInfo.Name" class="text-danger" />
+                            <label class="form-label fw-bold">Contact Name</label>
+                            <InputText class="form-control" @bind-Value="orderInfo.ContactName" />
+                            <ValidationMessage For="() => orderInfo.ContactName" class="text-danger" />
                         </div>
                         <div class="mb-3">
                             <label class="form-label fw-bold">Phone</label>
@@ -97,8 +97,8 @@
                         </div>
                         <div class="mb-3">
                             <label class="form-label fw-bold">Shipping Address</label>
-                            <InputText class="form-control" @bind-Value="orderInfo.Address" />
-                            <ValidationMessage For="() => orderInfo.Address" class="text-danger" />
+                            <InputText class="form-control" @bind-Value="orderInfo.ShippingAddress" />
+                            <ValidationMessage For="() => orderInfo.ShippingAddress" class="text-danger" />
                         </div>
                         <div class="mb-3">
                             <label class="form-label fw-bold">Notes</label>
@@ -117,7 +117,7 @@
 @code {
     private bool IsLoading { get; set; } = true;
     private IEnumerable<CartItemDTO> cartItems = new List<CartItemDTO>();
-    private OrderInfo orderInfo = new();
+    private CreateOrderDTO orderInfo = new();
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -195,27 +195,30 @@
         }
     }
 
-    private void CreateOrder()
-	{
-        // TODO place order
-        // Go to order detail page
-        Console.WriteLine($"Order: {JsonSerializer.Serialize(orderInfo)}");
-        Console.WriteLine($"Order items: {JsonSerializer.Serialize(cartItems)}");
-        // _navigationManager.NavigateTo("/Order/id");
-	}
-
-    public class OrderInfo
+    private async Task CreateOrder()
     {
-        [Required(ErrorMessage = "Name is required")]
-        public string Name { get; set; } = string.Empty;
+        try
+        {
+            orderInfo.Items = cartItems.Select(i => new CreateOrderItemDTO
+                {
+                    ProductId = i.ProductId,
+                    Quantity = i.Quantity
+                }).ToList();
 
-        [Required(ErrorMessage = "Phone number is required")]
-        [RegularExpression("^[0-9]{10,15}$", ErrorMessage = "Invalid phone number format")]
-        public string Phone { get; set; } = string.Empty;
-
-        [Required(ErrorMessage = "Shipping address is required")]
-        public string Address { get; set; } = string.Empty;
-
-        public string? Notes { get; set; }
+            var response = await Http.PostAsJsonAsync("api/orders", orderInfo);
+            if (response.IsSuccessStatusCode)
+            {
+                var createdOrder = await response.Content.ReadFromJsonAsync<OrderDTO>();
+                _navigationManager.NavigateTo($"orders/{createdOrder?.Id}");
+            }
+            else
+            {
+                Console.WriteLine("Error creating order.");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error placing order: {ex}");
+        }
     }
 }

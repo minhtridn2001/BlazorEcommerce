@@ -2,6 +2,7 @@ using BlazorEcommerce.Client.Pages;
 using BlazorEcommerce.Components;
 using BlazorEcommerce.Components.Account;
 using BlazorEcommerce.Data;
+using BlazorEcommerce.Services;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -20,6 +21,8 @@ builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddScoped<IdentityUserAccessor>();
 builder.Services.AddScoped<IdentityRedirectManager>();
 builder.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuthenticationStateProvider>();
+
+builder.Services.AddScoped<IOrderService, OrderService>();
 
 builder.Services.AddAuthentication(options =>
     {

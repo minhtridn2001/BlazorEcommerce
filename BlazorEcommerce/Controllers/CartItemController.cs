@@ -22,7 +22,7 @@ namespace BlazorEcommerce.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<CartItemDTO>>> GetCartItems()
         {
-            string userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (userId == null) return Unauthorized();
 
             var cartItems = await _context.CartItem
@@ -37,7 +37,7 @@ namespace BlazorEcommerce.Controllers
         [HttpPut("{productId}")]
         public async Task<IActionResult> PutProductIntoCart(string productId, [FromQuery] int change = 1)
         {
-            string userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (userId == null) return Unauthorized();
 
             var existingCartItem = await _context.CartItem
@@ -71,7 +71,7 @@ namespace BlazorEcommerce.Controllers
         [HttpDelete("{productId}")]
         public async Task<IActionResult> RemoveProductFromCart(string productId)
         {
-            string userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (userId == null) return Unauthorized();
 
             var cartItem = await _context.CartItem
