@@ -20,7 +20,7 @@
 }
 else
 {
-    @if (orders != null && orders.Count > 0)
+    @if (PagedOrders.Items != null && PagedOrders.Items.Count > 0)
     {
         <div class="overflow-x-auto">
             <table class="table-auto w-full border-collapse shadow-lg">
@@ -35,7 +35,7 @@ else
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var order in orders)
+                    @foreach (var order in PagedOrders.Items)
                     {
                         <tr class="hover:bg-gray-100 transition">
                             <td class="p-3 border text-center">@order.Id</td>
@@ -59,19 +59,7 @@ else
             </table>
         </div>
         <div class="flex justify-center items-center space-x-2 mt-4">
-            <button class="hover:bg-gray-300 px-2 py-1 rounded" @onclick="GoToFirstPage" disabled="@IsFirstPage">
-                <FluentIcon Value="@(new Microsoft.FluentUI.AspNetCore.Components.Icons.Regular.Size20.ChevronDoubleLeft())" />
-            </button>
-            <button class="hover:bg-gray-300 px-2 py-1 rounded" @onclick="GoToPreviousPage" disabled="@IsFirstPage">
-                <FluentIcon Value="@(new Microsoft.FluentUI.AspNetCore.Components.Icons.Regular.Size20.ChevronLeft())" />
-            </button>
-            <span class="text-lg font-semibold">Page @CurrentPage of @TotalPages</span>
-            <button class="hover:bg-gray-300 px-2 py-1 rounded" @onclick="GoToNextPage" disabled="@IsLastPage">
-				<FluentIcon Value="@(new Microsoft.FluentUI.AspNetCore.Components.Icons.Regular.Size20.ChevronRight())" />
-            </button>
-            <button class="hover:bg-gray-300 px-2 py-1 rounded" @onclick="GoToLastPage" disabled="@IsLastPage">
-                <FluentIcon Value="@(new Microsoft.FluentUI.AspNetCore.Components.Icons.Regular.Size20.ChevronDoubleRight())" />
-            </button>
+            <Pagination PagedResult="PagedOrders" OnPageChange="LoadOrders" />
         </div>
     }
     else
@@ -82,29 +70,26 @@ else
 
 @code {
     private bool IsLoading { get; set; } = true;
-    private List<OrderDTO>? orders;
-    private int PageSize = 10;
+    private PagedResultDTO<OrderDTO>? PagedOrders = new();
+    private int PageSize { get; set; } = 10;
     private int CurrentPage = 1;
     private int TotalPages = 1;
-    private bool IsFirstPage => CurrentPage == 1;
-    private bool IsLastPage => CurrentPage == TotalPages;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
-            await LoadOrders();
+            await LoadOrders((CurrentPage, PageSize));
         }
     }
 
-    private async Task LoadOrders()
+    private async Task LoadOrders((int pageNumber, int PageSize) paging)
     {
         IsLoading = true;
         try
         {
-            var response = await _http.GetFromJsonAsync<PagedResultDTO<OrderDTO>>($"api/orders?pageNumber={CurrentPage}&pageSize={PageSize}");
-            orders = response?.Items ?? new List<OrderDTO>();
-            TotalPages = response?.TotalPages ?? 1;
+            PagedOrders = await _http.GetFromJsonAsync<PagedResultDTO<OrderDTO>>($"api/orders?pageNumber={paging.pageNumber}&pageSize={paging.PageSize}");
+            CurrentPage = PagedOrders!.PageNumber;
         }
         catch (Exception ex)
         {
@@ -116,20 +101,6 @@ else
             StateHasChanged();
         }
     }
-
-    private void OnPageChanged(int newPage)
-    {
-        if (newPage != CurrentPage)
-        {
-            CurrentPage = newPage;
-            LoadOrders();
-        }
-    }
-
-    private async void GoToFirstPage() { CurrentPage = 1; await LoadOrders(); }
-    private async void GoToPreviousPage() { if (CurrentPage > 1) { CurrentPage--; await LoadOrders(); } }
-    private async void GoToNextPage() { if (CurrentPage < TotalPages) { CurrentPage++; await LoadOrders(); } }
-    private async void GoToLastPage() { CurrentPage = TotalPages; await LoadOrders(); }
 
     private string GetOrderStatusClass(string status)
     {

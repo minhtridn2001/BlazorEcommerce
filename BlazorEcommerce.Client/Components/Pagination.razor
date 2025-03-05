@@ -1,0 +1,81 @@
+﻿@typeparam T
+
+<div class="flex justify-between items-center">
+    <div class="flex items-center space-x-4">
+        <span class="text-sm">Total Items: <strong>@PagedResult.TotalItems</strong></span>
+
+        <label class="text-sm">Page Size:</label>
+        <select class="px-2 py-1 rounded border" @onchange="ChangePageSize">
+            <option value="5" selected="@(PagedResult.PageSize == 5)">5</option>
+            <option value="10" selected="@(PagedResult.PageSize == 10)">10</option>
+            <option value="20" selected="@(PagedResult.PageSize == 20)">20</option>
+            <option value="50" selected="@(PagedResult.PageSize == 50)">50</option>
+        </select>
+    </div>
+
+    <div class="flex items-center space-x-2">
+        <button class="hover:bg-gray-300 px-2 py-1 rounded" @onclick="() => GoToPage(1)" disabled="@IsFirstPage">
+            <FluentIcon Value="@(new Microsoft.FluentUI.AspNetCore.Components.Icons.Regular.Size20.ChevronDoubleLeft())" />
+        </button>
+        <button class="hover:bg-gray-300 px-2 py-1 rounded" @onclick="() => GoToPage(PagedResult.PageNumber - 1)" disabled="@IsFirstPage">
+            <FluentIcon Value="@(new Microsoft.FluentUI.AspNetCore.Components.Icons.Regular.Size20.ChevronLeft())" />
+        </button>
+
+        <div class="flex items-center space-x-1">
+            <span class="text-sm">Page</span>
+            <input type="number" class="px-2 py-1 rounded border text-center w-14" min="1" max="@PagedResult.TotalPages"
+                   value="@UserPageNumber" @onchange="OnPageInput" />
+            <span class="text-sm">of @PagedResult.TotalPages</span>
+        </div>
+
+        <button class="hover:bg-gray-300 px-2 py-1 rounded" @onclick="() => GoToPage(PagedResult.PageNumber + 1)" disabled="@IsLastPage">
+            <FluentIcon Value="@(new Microsoft.FluentUI.AspNetCore.Components.Icons.Regular.Size20.ChevronRight())" />
+        </button>
+        <button class="hover:bg-gray-300 px-2 py-1 rounded" @onclick="() => GoToPage(PagedResult.TotalPages)" disabled="@IsLastPage">
+            <FluentIcon Value="@(new Microsoft.FluentUI.AspNetCore.Components.Icons.Regular.Size20.ChevronDoubleRight())" />
+        </button>
+    </div>
+</div>
+
+@code {
+    /// <summary>
+    /// Event callback triggered when the page number or page size changes.
+    /// </summary>
+    /// <param name="pageNumber">The new page number.</param>
+    /// <param name="pageSize">The new page size.</param>
+    [Parameter] public EventCallback<(int pageNumber, int pageSize)> OnPageChange { get; set; }
+
+    [Parameter] public PagedResultDTO<T> PagedResult { get; set; } = new();
+    [Parameter] public EventCallback<int> OnPageSizeChange { get; set; }
+
+    private int UserPageNumber;
+
+    private bool IsFirstPage => PagedResult.PageNumber == 1;
+    private bool IsLastPage => PagedResult.PageNumber >= PagedResult.TotalPages;
+
+    protected override void OnParametersSet()
+    {
+        UserPageNumber = PagedResult.PageNumber;
+    }
+
+    private async Task GoToPage(int pageNumber)
+    {
+        if (pageNumber < 1 || pageNumber > PagedResult.TotalPages) return;
+        await OnPageChange.InvokeAsync((pageNumber, PagedResult.PageSize));
+    }
+
+    private async Task ChangePageSize(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out int newSize))
+        {
+            await OnPageChange.InvokeAsync((1, newSize));
+        }
+    }
+
+    private async void OnPageInput(ChangeEventArgs e)
+    {
+        UserPageNumber = int.Parse(e.Value?.ToString() ?? "1");
+        await GoToPage(UserPageNumber);
+    }
+
+}

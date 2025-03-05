@@ -2,7 +2,6 @@
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.FluentUI.AspNetCore.Components
 @using System.Globalization
-@using BlazorEcommerce.Shared.DTO
 
 @inject NavigationManager _navigationManager
 @inject AuthenticationStateProvider _authenticationStateProvider
@@ -33,7 +32,7 @@ else
         </ul>
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 lg:grid-cols-4 gap-3 mt-6">
-            @foreach (var prod in Products)
+            @foreach (var prod in PagedProducts!.Items)
             {
                 <div class="bg-white shadow-lg rounded-lg overflow-hidden">
                     <div class="flex justify-center bg-gray-50 p-4">
@@ -51,17 +50,21 @@ else
                 </div>
             }
         </div>
+        <div class="flex justify-center items-center space-x-2 mt-4">
+            <Pagination PagedResult="PagedProducts" OnPageChange="LoadProducts" />
+        </div>
     </div>
 }
 
 @code {
-    private IEnumerable<ProductDTO> Products = new List<ProductDTO>();
     private IEnumerable<CategoryDTO> Categories = new List<CategoryDTO>();
     private bool IsLoading { get; set; } = true;
     private int SelectedCategoryId { get; set; } = 0;
-    private int PageSize = 10;
+
+    private PagedResultDTO<ProductDTO>? PagedProducts = new();
+    private int PageSize { get; set; } = 10;
     private int CurrentPage = 1;
-    private int TotalPages;
+    private int TotalPages = 1;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -71,7 +74,7 @@ else
             {
                 await LoadCategories();
                 SelectedCategoryId = Categories.FirstOrDefault()?.Id ?? 0;
-                await LoadProducts(CurrentPage, SelectedCategoryId);
+                await LoadProducts((CurrentPage, PageSize));
             } catch (Exception ex) {
                 Console.Error.WriteLine($"Error loading data: {ex}");
             } 
@@ -99,16 +102,11 @@ else
         }
     }
 
-    private async Task LoadProducts(int pageNumber = 1, int categoryId = 0)
+    private async Task LoadProducts((int pageNumber, int pageSize) paging)
     {
         try
         {
-            var response = await Http.GetFromJsonAsync<PagedResultDTO<ProductDTO>>($"api/products?pageNumber={pageNumber}&pageSize={PageSize}&categoryId={SelectedCategoryId}");
-            if (response != null)
-            {
-                Products = response.Items;
-                TotalPages = response.TotalPages;
-            }
+            PagedProducts = await Http.GetFromJsonAsync<PagedResultDTO<ProductDTO>>($"api/products?pageNumber={paging.pageNumber}&pageSize={paging.pageSize}&categoryId={SelectedCategoryId}");
         }
         catch (Exception ex)
         {
@@ -120,7 +118,7 @@ else
     {
         SelectedCategoryId = categoryId;
         CurrentPage = 1;
-        await LoadProducts(CurrentPage, categoryId);
+        await LoadProducts((CurrentPage, PageSize));
         StateHasChanged();
     }
 
