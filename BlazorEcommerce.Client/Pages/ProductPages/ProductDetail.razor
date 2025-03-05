@@ -32,12 +32,10 @@
             </div>
         </div>
 
-        @if (!string.IsNullOrEmpty(product.ImageUrl))
-        {
-            <div class="mt-6 text-center">
-                <img src="@product.ImageUrl" alt="Product Image" class="rounded-lg shadow-md border max-w-xs mx-auto" />
-            </div>
-        }
+        <div class="mt-6 text-center">
+            <img src="@(string.IsNullOrWhiteSpace(product.ImageUrl) ? "/images/products/placeholder.png" : product.ImageUrl)"
+                 alt="Product Image" class="rounded-lg shadow-md border max-w-xs mx-auto" />
+        </div>
 
         <div class="mt-6 flex justify-between">
             <AddToCart ProductId="@product.Id" />

@@ -36,7 +36,9 @@ else
                 <div class="bg-white shadow-lg rounded-lg overflow-hidden">
                     <a href="@($"products/{prod.Id}")"
                        class="flex justify-center bg-gray-50 p-4 block">
-                        <img class="w-3/4 h-40 object-contain" src="@prod.ImageUrl" alt="@prod.Name">
+                        <img class="w-3/4 h-40 object-contain"
+                             src="@(string.IsNullOrWhiteSpace(prod.ImageUrl) ? "/images/products/placeholder.png" : prod.ImageUrl)"
+                             alt="@prod.Name">
                     </a>
 
                     <div class="p-4 text-center">
