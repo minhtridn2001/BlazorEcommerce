@@ -7,7 +7,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlazorEcommerce", "BlazorEc
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlazorEcommerce.Client", "BlazorEcommerce.Client\BlazorEcommerce.Client.csproj", "{39E03FC1-BE05-4ABA-ABCE-F270D2BFC159}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlazorEcommerce.Shared", "Shared\BlazorEcommerce.Shared.csproj", "{3F0E9176-5CB9-4768-BDC1-628ACBFB10A6}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlazorEcommerce.Shared", "BlazorEcommerce.Shared\BlazorEcommerce.Shared.csproj", "{3F0E9176-5CB9-4768-BDC1-628ACBFB10A6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlazorEcommerce.Tests", "BlazorEcommerce.Tests\BlazorEcommerce.Tests.csproj", "{EFA56F80-5244-4DCE-B420-358B3C1545B8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -27,6 +29,10 @@ Global
 		{3F0E9176-5CB9-4768-BDC1-628ACBFB10A6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3F0E9176-5CB9-4768-BDC1-628ACBFB10A6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3F0E9176-5CB9-4768-BDC1-628ACBFB10A6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EFA56F80-5244-4DCE-B420-358B3C1545B8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EFA56F80-5244-4DCE-B420-358B3C1545B8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EFA56F80-5244-4DCE-B420-358B3C1545B8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EFA56F80-5244-4DCE-B420-358B3C1545B8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

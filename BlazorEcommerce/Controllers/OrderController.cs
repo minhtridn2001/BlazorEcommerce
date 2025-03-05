@@ -1,10 +1,8 @@
-﻿using BlazorEcommerce.Constants;
-using System.Security.Claims;
+﻿using System.Security.Claims;
 using BlazorEcommerce.Data;
 using BlazorEcommerce.Shared.DTO;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using BlazorEcommerce.Services;
 
 namespace BlazorEcommerce.Controllers
@@ -15,12 +13,10 @@ namespace BlazorEcommerce.Controllers
     [Route("api/orders")]
     public class OrderController : Controller
     {
-        private readonly ApplicationDbContext _dbContext;
         private readonly IOrderService _orderService;
 
-        public OrderController(ApplicationDbContext dbContext, IOrderService orderService)
+        public OrderController(IOrderService orderService)
         {
-            _dbContext = dbContext;
             _orderService = orderService;
         }
 

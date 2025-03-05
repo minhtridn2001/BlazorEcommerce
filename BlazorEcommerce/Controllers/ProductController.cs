@@ -49,7 +49,6 @@ namespace BlazorEcommerce.Controllers
 
             return Ok(product);
         }
-
         private static ProductDTO ToProductDTO(Product product)
         {
             return new ProductDTO

@@ -14,7 +14,6 @@ namespace BlazorEcommerce.Services
         {
             _dbContext = dbContext;
         }
-
         public async Task<PagedResultDTO<OrderDTO>> GetAllOrdersAsync(string? userId, int pageNumber = 1, int pageSize = 10)
         {
             var orders = await _dbContext.Order
