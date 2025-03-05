@@ -1,0 +1,161 @@
+﻿@page "/Orders"
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.FluentUI.AspNetCore.Components
+@using System.Globalization
+@using BlazorEcommerce.Shared.DTO
+@using Icons = Microsoft.FluentUI.AspNetCore.Components.Icons
+
+@inject HttpClient _http
+@inject NavigationManager _navigation
+
+@attribute [Authorize]
+@rendermode InteractiveWebAssembly
+
+<h2 class="text-3xl font-bold text-center text-blue-600 mb-6">My Orders</h2>
+@if (IsLoading)
+{
+    <div class="position-absolute w-100 vh-50 d-flex align-items-center justify-content-center">
+        <FluentProgressRing></FluentProgressRing>
+    </div>
+}
+else
+{
+    @if (orders != null && orders.Count > 0)
+    {
+        <div class="overflow-x-auto">
+            <table class="table-auto w-full border-collapse shadow-lg">
+                <thead>
+                    <tr class="bg-blue-500 text-white">
+                        <th class="p-3 border">Order ID</th>
+                        <th class="p-3 border">Date</th>
+                        <th class="p-3 border">Total</th>
+                        <th class="p-3 border">Order Status</th>
+                        <th class="p-3 border">Payment Status</th>
+                        <th class="p-3 border">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var order in orders)
+                    {
+                        <tr class="hover:bg-gray-100 transition">
+                            <td class="p-3 border text-center">@order.Id</td>
+                            <td class="p-3 border text-center">@order.CreatedDate.ToString("MMM dd, yyyy")</td>
+                            <td class="p-3 border text-center text-green-600 font-semibold">@order.GrandTotal.ToString("C", CultureInfo.GetCultureInfo("vi-VN"))</td>
+                            <td class="p-3 border text-center">
+                                <span class="@GetOrderStatusClass(order.OrderStatus)">@order.OrderStatus</span>
+                            </td>
+                            <td class="p-3 border text-center">
+                                <span class="@GetPaymentStatusClass(order.PaymentStatus)">@order.PaymentStatus</span>
+                            </td>
+                            <td class="p-3 border text-center">
+                                <button class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded transition"
+                                @onclick="() => ViewOrder(order.Id)">
+                                    View Details
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        <div class="flex justify-center items-center space-x-2 mt-4">
+            <button class="hover:bg-gray-300 px-2 py-1 rounded" @onclick="GoToFirstPage" disabled="@IsFirstPage">
+                <FluentIcon Value="@(new Microsoft.FluentUI.AspNetCore.Components.Icons.Regular.Size20.ChevronDoubleLeft())" />
+            </button>
+            <button class="hover:bg-gray-300 px-2 py-1 rounded" @onclick="GoToPreviousPage" disabled="@IsFirstPage">
+                <FluentIcon Value="@(new Microsoft.FluentUI.AspNetCore.Components.Icons.Regular.Size20.ChevronLeft())" />
+            </button>
+            <span class="text-lg font-semibold">Page @CurrentPage of @TotalPages</span>
+            <button class="hover:bg-gray-300 px-2 py-1 rounded" @onclick="GoToNextPage" disabled="@IsLastPage">
+				<FluentIcon Value="@(new Microsoft.FluentUI.AspNetCore.Components.Icons.Regular.Size20.ChevronRight())" />
+            </button>
+            <button class="hover:bg-gray-300 px-2 py-1 rounded" @onclick="GoToLastPage" disabled="@IsLastPage">
+                <FluentIcon Value="@(new Microsoft.FluentUI.AspNetCore.Components.Icons.Regular.Size20.ChevronDoubleRight())" />
+            </button>
+        </div>
+    }
+    else
+    {
+        <p class="text-center text-gray-500 text-lg mt-6">No orders found.</p>
+    }
+}
+
+@code {
+    private bool IsLoading { get; set; } = true;
+    private List<OrderDTO>? orders;
+    private int PageSize = 10;
+    private int CurrentPage = 1;
+    private int TotalPages = 1;
+    private bool IsFirstPage => CurrentPage == 1;
+    private bool IsLastPage => CurrentPage == TotalPages;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await LoadOrders();
+        }
+    }
+
+    private async Task LoadOrders()
+    {
+        IsLoading = true;
+        try
+        {
+            var response = await _http.GetFromJsonAsync<PagedResultDTO<OrderDTO>>($"api/orders?pageNumber={CurrentPage}&pageSize={PageSize}");
+            orders = response?.Items ?? new List<OrderDTO>();
+            TotalPages = response?.TotalPages ?? 1;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error fetching orders: {ex}");
+        }
+        finally
+        {
+            IsLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private void OnPageChanged(int newPage)
+    {
+        if (newPage != CurrentPage)
+        {
+            CurrentPage = newPage;
+            LoadOrders();
+        }
+    }
+
+    private async void GoToFirstPage() { CurrentPage = 1; await LoadOrders(); }
+    private async void GoToPreviousPage() { if (CurrentPage > 1) { CurrentPage--; await LoadOrders(); } }
+    private async void GoToNextPage() { if (CurrentPage < TotalPages) { CurrentPage++; await LoadOrders(); } }
+    private async void GoToLastPage() { CurrentPage = TotalPages; await LoadOrders(); }
+
+    private string GetOrderStatusClass(string status)
+    {
+        return status switch
+        {
+            "Pending" => "bg-yellow-500 text-white px-2 py-1 rounded",
+            "Processing" => "bg-blue-500 text-white px-2 py-1 rounded",
+            "Delivering" => "bg-green-500 text-white px-2 py-1 rounded",
+            "Completed" => "bg-red-500 text-white px-2 py-1 rounded",
+            _ => "bg-gray-500 text-white px-2 py-1 rounded"
+        };
+    }
+
+    private string GetPaymentStatusClass(string status)
+    {
+        return status switch
+        {
+            "Pending" => "bg-yellow-500 text-white px-2 py-1 rounded",
+            "Paid" => "bg-green-500 text-white px-2 py-1 rounded",
+            "Failed" => "bg-red-500 text-white px-2 py-1 rounded",
+            _ => "bg-gray-500 text-white px-2 py-1 rounded"
+        };
+    }
+
+    private void ViewOrder(int id)
+    {
+        _navigation.NavigateTo($"/Orders/{id}");
+    }
+}

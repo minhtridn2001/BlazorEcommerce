@@ -1,5 +1,6 @@
 ﻿using BlazorEcommerce.Constants;
 using BlazorEcommerce.Data;
+using BlazorEcommerce.Data.Pagination;
 using BlazorEcommerce.Shared.DTO;
 using Microsoft.EntityFrameworkCore;
 
@@ -13,6 +14,17 @@ namespace BlazorEcommerce.Services
         {
             _dbContext = dbContext;
         }
+
+        public async Task<PagedResultDTO<OrderDTO>> GetAllOrdersAsync(string? userId, int pageNumber = 1, int pageSize = 10)
+        {
+            var orders = await _dbContext.Order
+                .Where(o => userId == null || o.UserId == userId)
+                .Include(o => o.Items)
+                .Select(x => ToOrderDTO(x))
+                .ToPagedResultAsync(pageNumber, pageSize);
+            return orders;
+        }
+
         public async Task<OrderDTO> CreateOrderAsync(string userId, CreateOrderDTO createOrderDTO)
         {
             var productIds = createOrderDTO.Items.Select(i => i.ProductId).ToList();

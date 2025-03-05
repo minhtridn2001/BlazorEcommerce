@@ -24,6 +24,17 @@ namespace BlazorEcommerce.Controllers
             _orderService = orderService;
         }
 
+        [HttpGet]
+        public async Task<ActionResult<PagedResultDTO<OrderDTO>>> GetAllOrders(
+            [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null) return Unauthorized();
+
+            var orders = await _orderService.GetAllOrdersAsync(userId, pageNumber, pageSize);
+            return Ok(orders);
+        }
+
         [HttpPost]
         public async Task<IActionResult> CreateOrder([FromBody] CreateOrderDTO createOrderDto)
         {
@@ -43,7 +54,7 @@ namespace BlazorEcommerce.Controllers
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (userId == null) return Unauthorized();
 
-            var order = await _orderService.GetOrderAsync(id);  
+            var order = await _orderService.GetOrderAsync(id);
 
             if (order == null)
                 return NotFound();

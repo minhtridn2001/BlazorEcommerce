@@ -8,7 +8,7 @@
 @inject AuthenticationStateProvider _authenticationStateProvider
 @inject HttpClient Http
 
-@rendermode InteractiveAuto
+@rendermode InteractiveWebAssembly
 
 <PageTitle>Home</PageTitle>
 @if (IsLoading)
@@ -19,46 +19,37 @@
 }
 else
 {
-    <div class="container-fluid px-0 m-0 full-width">
-        <div class="content px-4 m-2">
-            <ul class="nav justify-content-center mb-3 category-nav">
-                @foreach (var category in Categories)
-                {
-                    <li class="nav-item">
-                        <span class="nav-link @GetCategoryActiveClass(category.Id)" href="#@category.Name" @onclick="() => FilterProducts(category.Id)">@category.Name</span>
-                    </li>
-                }
-            </ul>
-            <div class="row mt-4 mx-1">
+    <div class="container mx-auto px-4">
+        <ul class="flex justify-center space-x-4 p-4">
+            @foreach (var category in Categories)
+            {
+                <li>
+                    <button class="px-4 py-2 rounded transition duration-300 @GetCategoryActiveClass(category.Id)"
+                    @onclick="() => FilterProducts(category.Id)">
+                        @category.Name
+                    </button>
+                </li>
+            }
+        </ul>
 
-                @foreach (var prod in Products)
-                {
-                    <div class="col-12 col-md-6 col-lg-4 pe-3 mb-5">
-                        <div class="card">
-                            <div class="text-center">
-                                @if (!string.IsNullOrEmpty(prod.ImageUrl))
-                                {
-                                    <img class="card-img-top img-thumbnail w-75 mt-2" src="@prod.ImageUrl" />
-                                }
-                                else
-                                {
-                                    <img class="card-img-top img-thumbnail w-75 mt-2" src="images/default.png" style="" />
-                                }
-
-                            </div>
-                            <div class="card-body">
-                                <h5 class="text-center lead">@prod.Price.ToString("C", CultureInfo.GetCultureInfo("vi-VN"))</h5>
-                                <h4 class="text-center text-warning lead">@prod.Name</h4>
-                                <h4 class="text-center">
-                                    <i class="bi bi-cart3 btn btn-success text-right  px-5 form-control" @onclick="() => AddToCart(prod.Id)"> Add to cart</i>
-                                </h4>
-
-
-                            </div>
-                        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 lg:grid-cols-4 gap-3 mt-6">
+            @foreach (var prod in Products)
+            {
+                <div class="bg-white shadow-lg rounded-lg overflow-hidden">
+                    <div class="flex justify-center bg-gray-50 p-4">
+                        <img class="w-3/4 h-40 object-contain" src="@(!string.IsNullOrEmpty(prod.ImageUrl) ? prod.ImageUrl : "images/default.png")" alt="@prod.Name">
                     </div>
-                }
-            </div>
+
+                    <div class="p-4 text-center">
+                        <h5 class="text-lg font-semibold text-gray-900">@prod.Price.ToString("C", CultureInfo.GetCultureInfo("vi-VN"))</h5>
+                        <h4 class="text-xl text-yellow-500 font-bold mt-2">@prod.Name</h4>
+                        <button class="mt-4 w-full bg-green-500 text-white py-2 rounded-lg hover:bg-green-600 transition duration-300"
+                        @onclick="() => AddToCart(prod.Id)">
+                            <i class="bi bi-cart3 mr-2"></i> Add to cart
+                        </button>
+                    </div>
+                </div>
+            }
         </div>
     </div>
 }
@@ -79,7 +70,7 @@ else
             try 
             {
                 await LoadCategories();
-				SelectedCategoryId = Categories.FirstOrDefault()?.Id ?? 0;
+                SelectedCategoryId = Categories.FirstOrDefault()?.Id ?? 0;
                 await LoadProducts(CurrentPage, SelectedCategoryId);
             } catch (Exception ex) {
                 Console.Error.WriteLine($"Error loading data: {ex}");
@@ -133,9 +124,9 @@ else
         StateHasChanged();
     }
 
-	private string GetCategoryActiveClass(int categoryId)
-	{
-		return categoryId == SelectedCategoryId ? "active" : "";
+    private string GetCategoryActiveClass(int categoryId)
+    {
+        return categoryId == SelectedCategoryId ? "bg-yellow-500 text-white font-bold" : "text-gray-700 hover:text-white hover:bg-yellow-400";
     }
 
     private async Task AddToCart(string productId)
