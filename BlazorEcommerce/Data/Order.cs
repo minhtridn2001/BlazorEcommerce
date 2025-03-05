@@ -1,7 +1,9 @@
 ﻿using BlazorEcommerce.Constants;
+using Microsoft.EntityFrameworkCore;
 
 namespace BlazorEcommerce.Data
 {
+    [Index(nameof(CreatedDate))]
     public class Order
     {
         public int Id { get; set; }
