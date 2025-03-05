@@ -49,9 +49,17 @@
 
     private async Task DeleteProductCategory()
     {
-        using var context = DbFactory.CreateDbContext();
-        context.ProductCategory.Remove(productcategory!);
-        await context.SaveChangesAsync();
-        NavigationManager.NavigateTo("/admin/productcategories");
+        try
+        {
+            using var context = DbFactory.CreateDbContext();
+            context.ProductCategory.Remove(productcategory!);
+            await context.SaveChangesAsync();
+            NavigationManager.NavigateTo("/admin/productcategories");
+		}
+		catch (Exception ex)
+		{
+			// The Category is referenced by a Product
+			Console.WriteLine($"Error deleting Category: {ex.Message}");
+        }
     }
 }

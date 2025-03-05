@@ -1,4 +1,5 @@
-﻿using Microsoft.Build.Framework;
+﻿
+using System.ComponentModel.DataAnnotations;
 
 namespace BlazorEcommerce.Data
 {
@@ -9,11 +10,13 @@ namespace BlazorEcommerce.Data
         public string Name { get; set; }
         public string? Description { get; set; }
         [Required]
+        [Range(0, double.MaxValue, MinimumIsExclusive = true, ErrorMessage = "Price must be greater than 0")]
         public decimal Price { get; set; }
         public string? ImageUrl { get; set; }
         public DateTime CreatedDate { get; set; } = DateTime.Now;
         public DateTime ModifiedDate { get; set; } = DateTime.Now;
         public bool IsDeleted { get; set; }
+        [Required]
         public int CategoryId { get; set; }
         public ProductCategory Category { get; set; }
 

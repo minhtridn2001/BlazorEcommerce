@@ -11,5 +11,16 @@ namespace BlazorEcommerce.Data
         public DbSet<BlazorEcommerce.Data.CartItem> CartItem { get; set; } = default!;
         public DbSet<BlazorEcommerce.Data.Order> Order { get; set; } = default!;
         public DbSet<BlazorEcommerce.Data.OrderItem> OrderItem { get; set; } = default!;
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<Product>()
+                .HasOne(p => p.Category)
+                .WithMany()
+                .HasForeignKey(p => p.CategoryId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            base.OnModelCreating(modelBuilder);
+        }
     }
 }
