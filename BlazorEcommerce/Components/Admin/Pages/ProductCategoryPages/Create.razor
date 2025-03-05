@@ -1,4 +1,4 @@
-﻿@page "/productcategories/create"
+﻿@page "/admin/productcategories/create"
 @using Microsoft.EntityFrameworkCore
 @using BlazorEcommerce.Data
 @using Microsoft.AspNetCore.Authorization
@@ -28,7 +28,7 @@
 </div>
 
 <div>
-    <a href="/productcategories">Back to List</a>
+    <a href="/admin/productcategories">Back to List</a>
 </div>
 
 @code {
@@ -41,6 +41,6 @@
         using var context = DbFactory.CreateDbContext();
         context.ProductCategory.Add(ProductCategory);
         await context.SaveChangesAsync();
-        NavigationManager.NavigateTo("/productcategories");
+        NavigationManager.NavigateTo("admin/productcategories");
     }
 }

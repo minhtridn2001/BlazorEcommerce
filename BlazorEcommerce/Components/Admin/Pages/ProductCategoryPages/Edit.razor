@@ -1,4 +1,4 @@
-﻿@page "/productcategories/edit"
+﻿@page "/admin/productcategories/edit"
 @using Microsoft.EntityFrameworkCore
 @using BlazorEcommerce.Data
 @using Microsoft.AspNetCore.Authorization
@@ -80,7 +80,7 @@ else
             }
         }
 
-        NavigationManager.NavigateTo("/productcategories");
+        NavigationManager.NavigateTo("/admin/productcategories");
     }
 
     private bool ProductCategoryExists(int id)

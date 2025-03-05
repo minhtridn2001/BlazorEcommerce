@@ -5,6 +5,7 @@ using BlazorEcommerce.Data;
 using BlazorEcommerce.Shared.DTO;
 using BlazorEcommerce.Data.Pagination;
 using Microsoft.Build.Framework;
+using System.Security.Claims;
 
 namespace BlazorEcommerce.Controllers
 {
@@ -33,6 +34,20 @@ namespace BlazorEcommerce.Controllers
                 .Select(x => ToProductDTO(x))
                 .ToPagedResultAsync(pageNumber, pageSize);
             return Ok(result);
+        }
+
+        [HttpGet("{id}")]
+        public async Task<ActionResult<ProductDTO>> GetProductById(string id)
+        {
+            var product = await _context.Product
+                .Where(p => p.Id == id)
+                .Select(p => ToProductDTO(p))
+                .FirstOrDefaultAsync(); 
+
+            if (product == null)
+                return NotFound();
+
+            return Ok(product);
         }
 
         private static ProductDTO ToProductDTO(Product product)

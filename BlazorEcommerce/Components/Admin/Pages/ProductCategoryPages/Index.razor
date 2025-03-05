@@ -1,4 +1,4 @@
-﻿@page "/productcategories"
+﻿@page "/admin/productcategories"
 @using Microsoft.EntityFrameworkCore
 @using Microsoft.AspNetCore.Components.QuickGrid
 @using BlazorEcommerce.Data
@@ -12,16 +12,16 @@
 <h1>Index</h1>
 
 <p>
-    <a href="productcategories/create">Create New</a>
+    <a href="admin/productcategories/create">Create New</a>
 </p>
 
 <QuickGrid Class="table" Items="context.ProductCategory">
     <PropertyColumn Property="productcategory => productcategory.Name" />
 
     <TemplateColumn Context="productcategory">
-        <a href="@($"productcategories/edit?id={productcategory.Id}")">Edit</a> |
-        <a href="@($"productcategories/details?id={productcategory.Id}")">Details</a> |
-        <a href="@($"productcategories/delete?id={productcategory.Id}")">Delete</a>
+        <a href="@($"admin/productcategories/edit?id={productcategory.Id}")">Edit</a> |
+        <a href="@($"admin/productcategories/details?id={productcategory.Id}")">Details</a> |
+        <a href="@($"admin/productcategories/delete?id={productcategory.Id}")">Delete</a>
     </TemplateColumn>
 </QuickGrid>
 

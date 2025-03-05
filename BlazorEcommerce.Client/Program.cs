@@ -1,3 +1,4 @@
+using BlazorEcommerce.Shared.ClientServices;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Microsoft.FluentUI.AspNetCore.Components;
 
@@ -10,5 +11,6 @@ builder.Services.AddAuthenticationStateDeserialization();
 builder.Services.AddFluentUIComponents();
 
 builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
+builder.Services.AddScoped<ProductService>();
 
 await builder.Build().RunAsync();

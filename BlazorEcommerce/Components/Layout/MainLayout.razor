@@ -1,15 +1,18 @@
 ﻿@inherits LayoutComponentBase
-@using BlazorEcommerce.Constants
+@inject NavigationManager _navigationManager
 @inject AuthenticationStateProvider _authenticationStateProvider
 
 <div class="page">
     <AuthorizeView Roles="@UserRoles.Admin">
-        <div class="sidebar">
-            <NavMenu />
-        </div>
+        @if (IsAdminPage)
+        {
+            <div class="sidebar">
+                <NavMenu />
+            </div>
+        }
     </AuthorizeView>
     <main>
-        @if (IsShowNavBar())
+        @if (!IsAdminPage)
         {
             <NavBar></NavBar>
         }
@@ -27,6 +30,7 @@
 
 @code {
 	private AuthenticationState _context = default!;
+    private bool IsAdminPage => _navigationManager.Uri.Contains("/admin", StringComparison.OrdinalIgnoreCase);
 	protected override async Task OnInitializedAsync()
 	{
         _context = await _authenticationStateProvider.GetAuthenticationStateAsync();

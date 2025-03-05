@@ -9,7 +9,11 @@
         </a>
 
         <div class="flex items-center space-x-6">
-            <NavLink href="/Cart" class="relative text-gray-700 hover:text-orange-500 transition duration-300">
+            <NavLink href="/Orders" class="text-gray-700 hover:text-yellow-500 transition duration-300">
+                <i class="bi bi-receipt"></i> My Orders
+            </NavLink>
+
+            <NavLink href="/Cart" class="relative text-gray-700 hover:text-yellow-500 transition duration-300">
                 <i class="bi bi-cart3 text-2xl"></i>
                 @if (CartItemCount > 0)
                 {
@@ -21,7 +25,9 @@
 
             <AuthorizeView>
                 <Authorized>
-                    <span class="text-gray-700">👋 Hello, @context?.User?.Identity?.Name</span>
+                    <NavLink class="nav-link" href="Account/Manage">
+                        <span class="text-gray-700">👋 Hello, @context?.User?.Identity?.Name</span>
+                    </NavLink>
                     <form action="Account/Logout" method="post">
                         <AntiforgeryToken />
                         <input type="hidden" name="ReturnUrl" value="@currentUrl" />
@@ -31,10 +37,10 @@
                     </form>
                 </Authorized>
                 <NotAuthorized>
-                    <NavLink href="Account/Register" class="text-gray-700 hover:text-orange-500 transition duration-300">
+                    <NavLink href="Account/Register" class="text-gray-700 hover:text-yellow-500 transition duration-300">
                         <i class="bi bi-person"></i> Register
                     </NavLink>
-                    <NavLink href="Account/Login" class="text-gray-700 hover:text-orange-500 transition duration-300">
+                    <NavLink href="Account/Login" class="text-gray-700 hover:text-yellow-500 transition duration-300">
                         <i class="bi bi-box-arrow-in-right"></i> Login
                     </NavLink>
                 </NotAuthorized>

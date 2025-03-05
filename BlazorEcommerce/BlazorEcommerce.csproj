@@ -8,8 +8,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Remove="Components\Pages\Home.razor" />
-    <Content Remove="Components\Pages\ProductPages\Edit.razor" />
+    <Content Remove="Components\Admin\Pages\Home.razor" />
+    <Content Remove="Components\Admin\Pages\ProductPages\Edit.razor" />
   </ItemGroup>
 
   <ItemGroup>

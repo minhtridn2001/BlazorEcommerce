@@ -1,4 +1,4 @@
-﻿@page "/productcategories/details"
+﻿@page "/admin/productcategories/details"
 @using Microsoft.EntityFrameworkCore
 @using BlazorEcommerce.Data
 @using Microsoft.AspNetCore.Authorization
@@ -23,8 +23,8 @@
             <dd class="col-sm-10">@productcategory.Name</dd>
         </dl>
         <div>
-            <a href="@($"/productcategories/edit?id={productcategory.Id}")">Edit</a> |
-            <a href="@($"/productcategories")">Back to List</a>
+            <a href="@($"/admin/productcategories/edit?id={productcategory.Id}")">Edit</a> |
+            <a href="@($"/admin/productcategories")">Back to List</a>
         </div>
     }
 </div>

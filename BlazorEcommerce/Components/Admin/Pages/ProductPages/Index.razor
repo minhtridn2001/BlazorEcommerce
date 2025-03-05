@@ -1,4 +1,4 @@
-﻿@page "/products"
+﻿@page "/admin/products"
 @using Microsoft.EntityFrameworkCore
 @using Microsoft.AspNetCore.Components.QuickGrid
 @using BlazorEcommerce.Data
@@ -6,6 +6,7 @@
 @attribute [Authorize(Roles = "Admin")]
 @implements IAsyncDisposable
 @inject IDbContextFactory<BlazorEcommerce.Data.ApplicationDbContext> DbFactory
+@inject NavigationManager NavigationManager
 
 <PageTitle>Index</PageTitle>
 
@@ -15,20 +16,18 @@
     <a href="products/create">Create New</a>
 </p>
 
-<QuickGrid Class="table" Items="context.Product">
+<QuickGrid Class="table" Items="context.Product.Include(p => p.Category)">
     <PropertyColumn Property="product => product.Name" />
-    <PropertyColumn Property="product => product.Description" />
     <PropertyColumn Property="product => product.Price" />
-    <PropertyColumn Property="product => product.ImageUrl" />
     <PropertyColumn Property="product => product.CreatedDate" />
     <PropertyColumn Property="product => product.ModifiedDate" />
     <PropertyColumn Property="product => product.IsDeleted" />
-    <PropertyColumn Property="product => product.CategoryId" />
+    <PropertyColumn Property="product => product.Category.Name" />
 
     <TemplateColumn Context="product">
-        <a href="@($"products/{product.Id}")">Edit</a> |
-        <a href="@($"products/details?id={product.Id}")">Details</a> |
-        <a href="@($"products/delete?id={product.Id}")">Delete</a>
+        <a href="@($"admin/products/edit?id={product.Id}")">Edit</a> |
+        <a href="@($"admin/products/details?id={product.Id}&returnUrl={NavigationManager.ToBaseRelativePath(NavigationManager.Uri)}")">Details</a> |
+        <a href="@($"admin/products/delete?id={product.Id}")">Delete</a>
     </TemplateColumn>
 </QuickGrid>
 

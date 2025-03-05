@@ -1,0 +1,41 @@
+﻿@inject NavigationManager Navigation
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject HttpClient Http
+
+<button class="bg-green-500 text-white px-6 py-2 rounded-lg hover:bg-green-600 transition duration-300"
+        @onclick="AddToCartAsync">
+    <i class="bi bi-cart3 mr-2"></i> Add to Cart
+</button>
+
+@code {
+    [Parameter] public string ProductId { get; set; } = default!;
+
+    private async Task AddToCartAsync()
+    {
+        var auth = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var isAuthenticated = auth?.User?.Identity?.IsAuthenticated ?? false;
+
+        if (!isAuthenticated)
+        {
+            Navigation.NavigateTo("Account/Login");
+            return;
+        }
+
+        try
+        {
+            var response = await Http.PutAsJsonAsync($"api/cartItems/{ProductId}", new { });
+            if (response.IsSuccessStatusCode)
+            {
+                Console.WriteLine($"Product {ProductId} added to cart successfully.");
+            }
+            else
+            {
+                Console.WriteLine($"Failed to add product {ProductId} to cart: {response}");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error adding product {ProductId} to cart: {ex.Message}");
+        }
+    }
+}

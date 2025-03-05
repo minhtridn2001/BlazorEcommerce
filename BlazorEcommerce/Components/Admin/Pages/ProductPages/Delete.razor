@@ -1,4 +1,4 @@
-﻿@page "/products/delete"
+﻿@page "/admin/products/delete"
 @using Microsoft.EntityFrameworkCore
 @using BlazorEcommerce.Data
 @using Microsoft.AspNetCore.Authorization
@@ -53,7 +53,7 @@
         </dl>
         <EditForm method="post" Model="product" OnValidSubmit="DeleteProduct" FormName="delete" Enhance>
             <button type="submit" class="btn btn-danger" disabled="@(product is null)">Delete</button> |
-            <a href="/products">Back to List</a>
+            <a href="/admin/products">Back to List</a>
         </EditForm>
     }
 </div>
@@ -80,6 +80,6 @@
         using var context = DbFactory.CreateDbContext();
         context.Product.Remove(product!);
         await context.SaveChangesAsync();
-        NavigationManager.NavigateTo("/products");
+        NavigationManager.NavigateTo("/admin/products");
     }
 }

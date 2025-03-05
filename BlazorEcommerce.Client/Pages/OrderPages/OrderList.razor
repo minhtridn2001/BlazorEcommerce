@@ -40,7 +40,7 @@ else
                         <tr class="hover:bg-gray-100 transition">
                             <td class="p-3 border text-center">@order.Id</td>
                             <td class="p-3 border text-center">@order.CreatedDate.ToString("MMM dd, yyyy")</td>
-                            <td class="p-3 border text-center text-green-600 font-semibold">@order.GrandTotal.ToString("C", CultureInfo.GetCultureInfo("vi-VN"))</td>
+                            <td class="p-3 border text-center text-green-600 font-semibold">@order.GrandTotal.ToVND()</td>
                             <td class="p-3 border text-center">
                                 <span class="@GetOrderStatusClass(order.OrderStatus)">@order.OrderStatus</span>
                             </td>

@@ -4,7 +4,6 @@
 @using System.Globalization
 
 @inject NavigationManager _navigationManager
-@inject AuthenticationStateProvider _authenticationStateProvider
 @inject HttpClient Http
 
 @rendermode InteractiveWebAssembly
@@ -35,17 +34,15 @@ else
             @foreach (var prod in PagedProducts!.Items)
             {
                 <div class="bg-white shadow-lg rounded-lg overflow-hidden">
-                    <div class="flex justify-center bg-gray-50 p-4">
-                        <img class="w-3/4 h-40 object-contain" src="@(!string.IsNullOrEmpty(prod.ImageUrl) ? prod.ImageUrl : "images/default.png")" alt="@prod.Name">
-                    </div>
+                    <a href="@($"products/{prod.Id}")"
+                       class="flex justify-center bg-gray-50 p-4 block">
+                        <img class="w-3/4 h-40 object-contain" src="@prod.ImageUrl" alt="@prod.Name">
+                    </a>
 
                     <div class="p-4 text-center">
-                        <h5 class="text-lg font-semibold text-gray-900">@prod.Price.ToString("C", CultureInfo.GetCultureInfo("vi-VN"))</h5>
+                        <h5 class="text-lg font-semibold text-gray-900">@prod.Price.ToVND()</h5>
                         <h4 class="text-xl text-yellow-500 font-bold mt-2">@prod.Name</h4>
-                        <button class="mt-4 w-full bg-green-500 text-white py-2 rounded-lg hover:bg-green-600 transition duration-300"
-                        @onclick="() => AddToCart(prod.Id)">
-                            <i class="bi bi-cart3 mr-2"></i> Add to cart
-                        </button>
+                        <AddToCart ProductId="@prod.Id" />
                     </div>
                 </div>
             }
@@ -125,32 +122,5 @@ else
     private string GetCategoryActiveClass(int categoryId)
     {
         return categoryId == SelectedCategoryId ? "bg-yellow-500 text-white font-bold" : "text-gray-700 hover:text-white hover:bg-yellow-400";
-    }
-
-    private async Task AddToCart(string productId)
-    {
-        var context = await _authenticationStateProvider.GetAuthenticationStateAsync();
-        var isAuthenticated = context?.User?.Identity?.IsAuthenticated;
-
-        if (!(isAuthenticated ?? false))
-        {
-            _navigationManager.NavigateTo("Account/Login");
-        }
-        try
-        {
-            var response = await Http.PutAsJsonAsync($"api/cartItems/{productId}", new { });
-            if (response.IsSuccessStatusCode)
-            {
-                Console.WriteLine("Product added to cart successfully.");
-            }
-            else
-            {
-                Console.WriteLine($"Failed to add product to cart with response: {response}");
-            }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Error adding product to cart: {ex.Message}");
-        }
     }
 }

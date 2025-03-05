@@ -1,0 +1,84 @@
+﻿@page "/admin/products/details"
+@using Microsoft.EntityFrameworkCore
+@using BlazorEcommerce.Data
+@using Microsoft.AspNetCore.Authorization
+
+@attribute [Authorize(Roles = "Admin")]
+@inject IDbContextFactory<BlazorEcommerce.Data.ApplicationDbContext> DbFactory
+@inject NavigationManager NavigationManager
+
+@rendermode InteractiveServer
+
+<PageTitle>Product Details</PageTitle>
+
+<div class="max-w-3xl mx-auto bg-white shadow-lg rounded-lg p-6 mt-6">
+    @if (product is null)
+    {
+        <p class="text-gray-500 text-center">Loading...</p>
+    }
+    else
+    {
+        <h1 class="text-2xl font-semibold text-gray-800">@product.Name</h1>
+        <hr class="my-4" />
+        <div class="grid grid-cols-2 gap-4 text-sm text-gray-700">
+            <div class="font-medium">Description:</div>
+            <div>@product.Description</div>
+
+            <div class="font-medium">Price:</div>
+            <div class="text-green-600 font-semibold">@product.Price.ToString("C")</div>
+
+                <div class="font-medium">Category:</div>
+                <div>@product.Category.Name</div>
+
+                <div class="font-medium">Created Date:</div>
+                <div>@product.CreatedDate</div>
+
+                <div class="font-medium">Modified Date:</div>
+                <div>@product.ModifiedDate</div>
+            
+                <div class="font-medium">Is Deleted:</div>
+                <div class="@((product.IsDeleted) ? "text-red-500" : "text-green-500")">@(product.IsDeleted ? "Yes" : "No")</div>
+        </div>
+
+        @if (!string.IsNullOrEmpty(product.ImageUrl))
+        {
+            <div class="mt-6 text-center">
+                <img src="@product.ImageUrl" alt="Product Image" class="rounded-lg shadow-md border max-w-xs mx-auto" />
+            </div>
+        }
+
+        <div class="mt-6 flex justify-between">
+            <a href="@($"/admin/products/edit?id={product.Id}")" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition">Edit</a>
+        </div>
+        <div class="mt-4 text-center">
+            <a href="/admin/products" class="text-blue-500 hover:underline">← Back to Product List</a>
+        </div>
+    }
+</div>
+
+
+@code {
+    private Product? product;
+
+    [SupplyParameterFromQuery]
+    private string Id { get; set; }
+
+    [SupplyParameterFromQuery]
+    private string? returnUrl { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        product = await context.Product.Include(p => p.Category).FirstOrDefaultAsync(m => m.Id == Id);
+
+        if (product is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+
+    private void GoBack()
+    {
+        NavigationManager.NavigateTo(returnUrl ?? "/");
+    }
+}

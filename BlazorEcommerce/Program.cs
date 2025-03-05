@@ -1,4 +1,3 @@
-using BlazorEcommerce.Client.Pages;
 using BlazorEcommerce.Components;
 using BlazorEcommerce.Components.Account;
 using BlazorEcommerce.Data;
@@ -23,6 +22,8 @@ builder.Services.AddScoped<IdentityRedirectManager>();
 builder.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuthenticationStateProvider>();
 
 builder.Services.AddScoped<IOrderService, OrderService>();
+builder.Services.AddScoped<BlazorEcommerce.Shared.ClientServices.ProductService>();
+
 
 builder.Services.AddAuthentication(options =>
     {
