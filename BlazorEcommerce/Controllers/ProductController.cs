@@ -23,7 +23,7 @@ namespace BlazorEcommerce.Controllers
 
         [HttpGet]
         public async Task<ActionResult<PagedResultDTO<ProductDTO>>> GetProducts(
-            [FromQuery] int? categoryId, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+            [FromQuery] int? categoryId, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10, [FromQuery] string? orderBy = null)
         {
             var query = _context.Product.Where(x => !x.IsDeleted);
             if (categoryId.HasValue && categoryId != 0)
@@ -31,9 +31,25 @@ namespace BlazorEcommerce.Controllers
                 query = query.Where(x => x.CategoryId == categoryId.Value);
             }
             var result = await query
-                .Select(x => ToProductDTO(x))
-                .ToPagedResultAsync(pageNumber, pageSize);
-            return Ok(result);
+                .ToPagedResultAsync(pageNumber, pageSize, orderBy);
+
+            var pagedResultDTO = new PagedResultDTO<ProductDTO>(
+                result.Items.Select(x => new ProductDTO
+                {
+                    Id = x.Id,
+                    Name = x.Name,
+                    Description = x.Description,
+                    Price = x.Price,
+                    ImageUrl = x.ImageUrl,
+                    CreatedDate = x.CreatedDate,
+                    ModifiedDate = x.ModifiedDate,
+                    CategoryId = x.CategoryId
+                }).ToList(),
+                result.TotalItems,
+                result.PageNumber,
+                result.PageSize
+            );
+            return Ok(pagedResultDTO);
         }
 
         [HttpGet("{id}")]

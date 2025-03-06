@@ -105,11 +105,12 @@ app.MapAdditionalIdentityEndpoints();
 app.MapControllers();
 
 
-// Seed the default admin
+// Seed the default data
 using (var scope = app.Services.CreateScope())
 {
     var serviceProvider = scope.ServiceProvider;
     await DataSeeder.SeedDefaultAdminUserAsync(serviceProvider);
+    await DataSeeder.SeedSampleDataAsync(serviceProvider);
 }
 
 app.Run();
